@@ -6,18 +6,31 @@ A 3D, animated model of a beating human heart, built with [Three.js](https://thr
 
 ## What it shows
 
-- Four chambers (right/left atria, right/left ventricles) plus the great vessels
-  (superior/inferior vena cava, pulmonary artery, pulmonary veins, aorta), laid
-  out in standard anatomical-illustration orientation (as if facing a patient).
+- A single, continuous muscle wall (epicardium) rather than four separate
+  coloured balls: the chambers are modelled as overlapping "lobes" and
+  blended into one organic shape with a metaball-style smooth-minimum SDF,
+  triangulated with marching cubes so the surface has no seams, creases, or
+  hidden holes at any viewing angle.
+- Surface detail that reads as a real organ: a glossy, faintly mottled wet
+  material (clearcoat + sheen), a darkened coronary sulcus where the atria
+  meet the ventricles, epicardial fat deposits, and coronary vessels (LAD,
+  great cardiac vein, RCA) running across the surface.
+- The great vessels (superior/inferior vena cava, pulmonary artery, pulmonary
+  veins, aorta), laid out in standard anatomical-illustration orientation (as
+  if facing a patient), meeting the muscle wall flush rather than floating or
+  poking through it.
 - A real cardiac-cycle animation: atrial systole &rarr; ventricular systole &rarr;
-  diastole, with chambers visibly contracting and relaxing in sequence.
+  diastole. Each region of the shell contracts and relaxes locally (a
+  per-vertex blend of "atria vs. ventricle"), not just a uniform full-model
+  pulse.
 - Directional blood flow: particles travel deoxygenated blood (blue) from the
   vena cavae through the right heart to the pulmonary artery, and oxygenated
   blood (red) from the pulmonary veins through the left heart to the aorta,
   speeding up during ejection.
-- Adjustable heart rate (40&ndash;180 bpm), play/pause, auto-rotate, toggleable
-  chamber/vessel labels, toggleable blood flow, and a "cutaway" (semi-transparent)
-  view.
+- A "cutaway" toggle that makes the outer wall translucent, revealing the
+  four internal chambers colour-coded by oxygenation.
+- Adjustable heart rate (40&ndash;180 bpm), play/pause, auto-rotate, and toggleable
+  chamber/vessel labels and blood flow.
 
 This is a simplified, stylized teaching model, not a medically precise
 reconstruction &mdash; chamber proportions and vessel paths are illustrative.
@@ -48,4 +61,6 @@ dependency (Three.js) is already vendored in `vendor/three/`.
 ## Files
 
 - `index.html` &mdash; the entire app (markup, styles, and animation logic).
-- `vendor/three/` &mdash; vendored Three.js build + `OrbitControls` addon (MIT licensed).
+- `vendor/three/` &mdash; vendored Three.js build plus the `OrbitControls`,
+  `RoomEnvironment`, `BufferGeometryUtils` (vertex welding), and
+  `MarchingCubes` (lookup tables only) addons, all MIT licensed.
