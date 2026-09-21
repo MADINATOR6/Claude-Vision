@@ -158,8 +158,8 @@
 </div>
 
 <div id="legend">
-  <div class="item"><span class="swatch" style="background:#e0384a;"></span>Oxygenated (LA &middot; LV &middot; Aorta)</div>
-  <div class="item"><span class="swatch" style="background:#3a6fd8;"></span>Deoxygenated (RA &middot; RV &middot; PA)</div>
+  <div class="item"><span class="swatch" style="background:#e0483f;"></span>Oxygenated (LA &middot; LV &middot; Aorta)</div>
+  <div class="item"><span class="swatch" style="background:#3a66c0;"></span>Deoxygenated (RA &middot; RV &middot; PA)</div>
 </div>
 
 <div id="status">
@@ -255,41 +255,42 @@ scene.add(ground);
 --------------------------------------------------------------------- */
 // Outer muscle wall (epicardium) - a single continuous organic mesh, built further
 // down. Vertex colours carry the mottling/groove shading, so the base colour here
-// stays neutral white.
+// stays neutral white. Palette and finish target a bright, clean medical-
+// illustration look (warm peach/salmon muscle, glossy "plastic model" sheen)
+// rather than a dark photorealistic one.
 const epicardiumMat = new THREE.MeshPhysicalMaterial({
   vertexColors: true,
-  roughness: 0.48,
+  roughness: 0.38,
   metalness: 0.0,
-  clearcoat: 0.55,
-  clearcoatRoughness: 0.28,
-  sheen: 1.0,
-  sheenColor: new THREE.Color(0x2a0004),
-  sheenRoughness: 0.75,
-  envMapIntensity: 0.8,
+  clearcoat: 0.75,
+  clearcoatRoughness: 0.18,
+  sheen: 0.4,
+  sheenColor: new THREE.Color(0xffe0c8),
+  sheenRoughness: 0.6,
+  envMapIntensity: 0.9,
 });
 // Inner chamber linings - only visible through the epicardium in cutaway mode.
+// Same red/blue oxygenation convention as the great vessels below.
 const oxyRed = new THREE.MeshPhysicalMaterial({
-  color: 0xd42f42, roughness: 0.4, clearcoat: 0.4, clearcoatRoughness: 0.3,
-  emissive: 0x3a0006, emissiveIntensity: 0.15,
+  color: 0xe0483f, roughness: 0.35, clearcoat: 0.6, clearcoatRoughness: 0.2,
 });
 const deoxyBlue = new THREE.MeshPhysicalMaterial({
-  color: 0x3568c4, roughness: 0.4, clearcoat: 0.4, clearcoatRoughness: 0.3,
-  emissive: 0x030a33, emissiveIntensity: 0.15,
+  color: 0x3a66c0, roughness: 0.35, clearcoat: 0.6, clearcoatRoughness: 0.2,
 });
 const vesselRedMat = new THREE.MeshPhysicalMaterial({
-  color: 0xa72c3d, roughness: 0.45, clearcoat: 0.45, clearcoatRoughness: 0.3,
+  color: 0xe0483f, roughness: 0.4, clearcoat: 0.6, clearcoatRoughness: 0.2,
 });
 const vesselBlueMat = new THREE.MeshPhysicalMaterial({
-  color: 0x39508a, roughness: 0.45, clearcoat: 0.45, clearcoatRoughness: 0.3,
+  color: 0x3a66c0, roughness: 0.4, clearcoat: 0.6, clearcoatRoughness: 0.2,
 });
 const coronaryArteryMat = new THREE.MeshPhysicalMaterial({
-  color: 0x6b1420, roughness: 0.35, clearcoat: 0.7, clearcoatRoughness: 0.2,
+  color: 0xc23b2e, roughness: 0.3, clearcoat: 0.75, clearcoatRoughness: 0.15,
 });
 const coronaryVeinMat = new THREE.MeshPhysicalMaterial({
-  color: 0x35204a, roughness: 0.35, clearcoat: 0.7, clearcoatRoughness: 0.2,
+  color: 0x2f5aa8, roughness: 0.3, clearcoat: 0.75, clearcoatRoughness: 0.15,
 });
 const epicardialFatMat = new THREE.MeshPhysicalMaterial({
-  color: 0xd9c98a, roughness: 0.75, clearcoat: 0.15,
+  color: 0xf0dfa0, roughness: 0.7, clearcoat: 0.2,
 });
 
 /* ---------------------------------------------------------------------
@@ -513,8 +514,10 @@ const epiPivots = new Float32Array(epiVertexCount * 3);
 const epiAtriaWeight = new Float32Array(epiVertexCount);
 const epiColors = new Float32Array(epiVertexCount * 3);
 
-const colorDeep = new THREE.Color(0x6e1018);
-const colorLight = new THREE.Color(0xb8524a);
+// Warm peach/salmon muscle tone (medical-illustration style) rather than a
+// dark photorealistic red.
+const colorDeep = new THREE.Color(0xcf8060);
+const colorLight = new THREE.Color(0xf0b8a0);
 const tmpColor = new THREE.Color();
 
 for (let i = 0; i < epiVertexCount; i++) {
@@ -538,14 +541,15 @@ for (let i = 0; i < epiVertexCount; i++) {
   epiPivots[i * 3] = pivot.x; epiPivots[i * 3 + 1] = pivot.y; epiPivots[i * 3 + 2] = pivot.z;
   epiAtriaWeight[i] = atriaWeight;
 
-  // Darken the coronary sulcus (the groove where atria meet ventricles, where
-  // atriaWeight crosses ~0.5) and add gentle mottling so the surface doesn't
-  // look like flat plastic.
+  // A soft shadow along the coronary sulcus (the groove where atria meet
+  // ventricles, where atriaWeight crosses ~0.5) plus very gentle mottling -
+  // an illustration-style surface stays clean and mostly uniform rather than
+  // heavily speckled.
   const groove = Math.exp(-Math.pow((atriaWeight - 0.5) / 0.1, 2));
   const hash = Math.sin(vx * 12.9898 + vy * 78.233 + vz * 37.719) * 43758.5453;
   const noise = hash - Math.floor(hash);
-  let mix = 0.55 + noise * 0.3 - groove * 0.4;
-  mix = Math.min(Math.max(mix, 0.05), 1);
+  let mix = 0.65 + noise * 0.1 - groove * 0.22;
+  mix = Math.min(Math.max(mix, 0.25), 1);
   tmpColor.copy(colorLight).lerp(colorDeep, 1 - mix);
   epiColors[i * 3] = tmpColor.r; epiColors[i * 3 + 1] = tmpColor.g; epiColors[i * 3 + 2] = tmpColor.b;
 }
